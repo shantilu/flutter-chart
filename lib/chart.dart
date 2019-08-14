@@ -85,6 +85,7 @@ List<LineSeries<_ChartData, DateTime>> getLineSeries() {
   DateTime today = new DateTime.now();
   List<_ChartData> chartDataLine = new List(310);
   today = today.add(new Duration(seconds: 60*10));
+
   for (int i = 0; i < 310; i++) {
     int val = getRandomInt(9000, 12000);
     // add some empty points
@@ -107,6 +108,14 @@ List<LineSeries<_ChartData, DateTime>> getLineSeries() {
         _ChartData(chartDataLine[i * 10].x, chartDataLine[i * 10].y, order);
   }
 
+//  double profit = getRandomInt(9000, 12000);
+//  double loss = getRandomInt(9000, 12000);
+//
+//  List<_ChartData> chartDataProfit = [
+//    _ChartData(
+//        chartDataLine[0], );
+//  ]
+
   return <LineSeries<_ChartData, DateTime>>[
     LineSeries<_ChartData, DateTime>(
         enableTooltip: false,
@@ -116,6 +125,24 @@ List<LineSeries<_ChartData, DateTime>> getLineSeries() {
         yValueMapper: (_ChartData sales, _) => sales.y,
         color: Colors.blueAccent,
         width: 1),
+//    LineSeries<_ChartData, DateTime>(
+//        name: 'CutProfit',
+//        enableTooltip: false,
+//        animationDuration: 0,
+//        dataSource: chartDataLine,
+//        xValueMapper: (_ChartData sales, _) => sales.x,
+//        yValueMapper: (_ChartData sales, _) => sales.y,
+//        color: Colors.redAccent,
+//        width: 1),
+//    LineSeries<_ChartData, DateTime>(
+//        name: 'CutLoss',
+//        enableTooltip: false,
+//        animationDuration: 0,
+//        dataSource: chartDataLine,
+//        xValueMapper: (_ChartData sales, _) => sales.x,
+//        yValueMapper: (_ChartData sales, _) => sales.y,
+//        color: Colors.lightGreen,
+//        width: 1),
     LineSeries<_ChartData, DateTime>(
         enableTooltip: true,
         animationDuration: 2500,
@@ -125,7 +152,7 @@ List<LineSeries<_ChartData, DateTime>> getLineSeries() {
         pointColorMapper: (_ChartData sales, _) =>
             sales.order.isLong ? t_red : t_green,
         markerSettings: MarkerSettings(isVisible: true),
-        width: 1)
+        width: 0)
   ];
 }
 

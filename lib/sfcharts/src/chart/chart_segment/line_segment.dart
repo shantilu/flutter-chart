@@ -86,6 +86,39 @@ class LineSegment extends ChartSegment {
     path.lineTo(x2, y2);
     _drawDashedLine(canvas, series, strokePaint, path);
 
+    if (currentSegmentIndex == -1 && series.enableTooltip==false) {
+      final double labelPadding = 5;
+
+      final Paint bottomLinePaint = Paint()
+        ..color = Colors.amber
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1;
+
+      final Path bottomLinePath = Path();
+
+      double start = x1 + 20;
+
+      bottomLinePath.moveTo(0, y1);
+      bottomLinePath.lineTo(start, y1);
+
+      canvas.drawPath(
+          _dashPath(
+            bottomLinePath,
+            dashArray: _CircularIntervalList<double>(<double>[15, 3, 3, 3]),
+          ),
+          bottomLinePaint);
+
+      final TextSpan span = TextSpan(
+        style: TextStyle(
+            color: Colors.blueAccent, fontSize: 12.0, fontFamily: 'Roboto'),
+        text: 'Current',
+      );
+      final TextPainter tp =
+      TextPainter(text: span, textDirection: TextDirection.ltr);
+      tp.layout();
+      tp.paint(
+          canvas, Offset(start + labelPadding, y1-7));
+    }
   }
 
   /// Method to set data.
