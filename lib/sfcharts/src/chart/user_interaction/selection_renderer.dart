@@ -1128,6 +1128,7 @@ class _SelectionRenderer {
       _CartesianChartPoint<dynamic> point1,
       _CartesianChartPoint<dynamic> point2,
       _CartesianChartPoint<dynamic> point3) {
+
     final int value = (((point2.y - point1.y) * (point3.x - point2.x)) -
             ((point2.x - point1.x) * (point3.y - point2.y)))
         .toInt();
@@ -1259,6 +1260,9 @@ class _SelectionRenderer {
     final _CartesianChartPoint<dynamic> endSegment =
         _CartesianChartPoint<dynamic>(x2, y2);
 
+    if (startSegment.x.isNaN || startSegment.y.isNaN || endSegment.x.isNaN || endSegment.y.isNaN ){
+      return false;
+    }
     if (isLineIntersect(startSegment, endSegment, leftPoint, rightPoint) ||
         isLineIntersect(startSegment, endSegment, topPoint, bottomPoint)) {
       return true;

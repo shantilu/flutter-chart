@@ -1,15 +1,13 @@
 import 'dart:math';
 
 import 'package:intl/intl.dart';
-// import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:flutter_chart/sfcharts/charts.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart' as prefix0;
 import 'dart:ui';
 
 ZoomPanBehavior zoomPan;
-List<num> xValues;
-List<num> yValues;
+double profit = 12300;
+double lost = 8600;
 
 class ChartWidget extends StatelessWidget {
   @override
@@ -17,36 +15,56 @@ class ChartWidget extends StatelessWidget {
     zoomPan = ZoomPanBehavior(
         enablePinching: true, zoomMode: ZoomMode.x, enablePanning: true);
 
-    return Container(
-        height:400,
-        child: SfCartesianChart(
-          plotAreaBorderWidth: 0,
-          primaryXAxis: DateTimeAxis(
-            intervalType: DateTimeIntervalType.minutes,
-            dateFormat: DateFormat.Hm(),
-            zoomFactor: 0.1,
-            zoomPosition: 1.0,
-//          interval: 5,
-//        dateFormat: DateFormat.s(),
-            majorGridLines: MajorGridLines(width: 0),
-          ),
-          primaryYAxis: NumericAxis(
-              minimum: 8000,
-              opposedPosition: true,
-//        maximum: 13000,
-//        interval: 100,
-              axisLine: AxisLine(width: 0),
-              majorTickLines: MajorTickLines(size: 0)),
-          series: getLineSeries(),
-          tooltipBehavior: TooltipBehavior(enable: true),
-          zoomPanBehavior: zoomPan,
-          trackballBehavior: TrackballBehavior(
-              enable: true,
-              activationMode: ActivationMode.singleTap,
-              lineType: TrackballLineType.vertical,
-              tooltipSettings:
-              InteractiveTooltip(format: '{point.x} : {point.y}')),
-        ));
+    return Scaffold(
+      appBar: AppBar(
+        // Here we take the value from the MyHomePage object that was created by
+        // the App.build method, and use it to set our appbar title.
+        title: Text("Chart"),
+      ),
+      body: Center(
+        // Center is a layout widget. It takes a single child and positions it
+        // in the middle of the parent.
+          child: Container(
+              height:400,
+              child: SfCartesianChart(
+                legend: Legend(
+                    isVisible: true,
+                    position: LegendPosition.bottom,
+                    overflowMode: LegendItemOverflowMode.wrap),
+                plotAreaBorderWidth: 0,
+                primaryXAxis: DateTimeAxis(
+                  intervalType: DateTimeIntervalType.minutes,
+                  dateFormat: DateFormat.Hm(),
+                  zoomFactor: 0.2,
+                  zoomPosition: 1.0,
+                  majorGridLines: MajorGridLines(width: 0),
+                ),
+                primaryYAxis: NumericAxis(
+                    minimum: 8000,
+                    opposedPosition: true,
+                    axisLine: AxisLine(width: 0),
+                    majorTickLines: MajorTickLines(size: 0)),
+                series: getLineSeries(),
+                tooltipBehavior: TooltipBehavior(enable: true),
+                zoomPanBehavior: zoomPan,
+//          trackballBehavior: TrackballBehavior(
+//              enable: true,
+//              activationMode: ActivationMode.singleTap,
+//              lineType: TrackballLineType.vertical,
+//              tooltipSettings:
+//              InteractiveTooltip(format: '{point.x} : {point.y}')
+//          ),
+              ))
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          profit = profit + 1000;
+          lost = lost - 1000;
+        },
+        tooltip: 'Increment',
+        child: Icon(Icons.add),
+      ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
   }
 }
 
@@ -86,21 +104,31 @@ List<LineSeries<_ChartData, DateTime>> getLineSeries() {
   List<_ChartData> chartDataLine = new List(310);
   today = today.add(new Duration(seconds: 60*10));
 
-  for (int i = 0; i < 310; i++) {
-    int val = getRandomInt(9000, 12000);
-    // add some empty points
-    double value = i>10?val.toDouble():null;
-    chartDataLine[i] = _ChartData(
-        today.subtract(new Duration(seconds: 60 * i)), value);
-  }
+  const List<double> strikes = [8, 9, 10, 12, 13];
+  const List<String> namesList = ["tradefun","tokehunt","shiranui-mai","cybest-test","hyper-jagger"];
 
   const Color t_green = Color.fromRGBO(0, 189, 174, 0);
   const Color t_red = Color.fromRGBO(229, 101, 144, 0);
 
-  List<_ChartData> chartData = new List(30);
+  double current = 0;
+  for (int i = 0; i < 310; i++) {
+    int val = getRandomInt(9000, 12000);
+    // add some empty points
+    double value = i>10?val.toDouble():null;
+    if(current == 0 && value != null){
+      current = value;
+    }
 
-  const List<double> strikes = [8, 9, 10, 12, 13];
-  const List<String> namesList = ["tradefun","tokehunt","shiranui-mai","cybest-test","hyper-jagger"];
+    _OrderInfo order;
+    if(i%10 == 0){
+      int val = getRandomInt(0, strikes.length);
+      order = new _OrderInfo(strikes[val]*1000,strikes[val]<11, namesList[val]);
+    }
+    chartDataLine[i] = _ChartData(
+        today.subtract(new Duration(seconds: 60 * i)), value, order);
+  }
+
+  List<_ChartData> chartData = new List(30);
   for (int i = 0; i < 30; i++) {
     int val = getRandomInt(0, strikes.length);
     _OrderInfo order = new _OrderInfo(strikes[val]*1000,strikes[val]<11, namesList[val]);
@@ -108,16 +136,9 @@ List<LineSeries<_ChartData, DateTime>> getLineSeries() {
         _ChartData(chartDataLine[i * 10].x, chartDataLine[i * 10].y, order);
   }
 
-//  double profit = getRandomInt(9000, 12000);
-//  double loss = getRandomInt(9000, 12000);
-//
-//  List<_ChartData> chartDataProfit = [
-//    _ChartData(
-//        chartDataLine[0], );
-//  ]
-
   return <LineSeries<_ChartData, DateTime>>[
     LineSeries<_ChartData, DateTime>(
+        name: 'Prices',
         enableTooltip: false,
         animationDuration: 0,
         dataSource: chartDataLine,
@@ -125,34 +146,46 @@ List<LineSeries<_ChartData, DateTime>> getLineSeries() {
         yValueMapper: (_ChartData sales, _) => sales.y,
         color: Colors.blueAccent,
         width: 1),
-//    LineSeries<_ChartData, DateTime>(
-//        name: 'CutProfit',
-//        enableTooltip: false,
-//        animationDuration: 0,
-//        dataSource: chartDataLine,
-//        xValueMapper: (_ChartData sales, _) => sales.x,
-//        yValueMapper: (_ChartData sales, _) => sales.y,
-//        color: Colors.redAccent,
-//        width: 1),
-//    LineSeries<_ChartData, DateTime>(
-//        name: 'CutLoss',
-//        enableTooltip: false,
-//        animationDuration: 0,
-//        dataSource: chartDataLine,
-//        xValueMapper: (_ChartData sales, _) => sales.x,
-//        yValueMapper: (_ChartData sales, _) => sales.y,
-//        color: Colors.lightGreen,
-//        width: 1),
     LineSeries<_ChartData, DateTime>(
+        name: 'Current',
+        enableTooltip: false,
+        animationDuration: 0,
+        dataSource: chartDataLine,
+        xValueMapper: (_ChartData sales, _) => sales.x,
+        yValueMapper: (_ChartData sales, _) => current,
+        color: Colors.blue,
+        width: 1),
+    LineSeries<_ChartData, DateTime>(
+        name: 'Profit',
+        enableTooltip: false,
+        animationDuration: 0,
+        dashArray: [3, 3, 3, 3],
+        dataSource: chartDataLine,
+        xValueMapper: (_ChartData sales, _) => sales.x,
+        yValueMapper: (_ChartData sales, _) => profit,
+        color: Colors.redAccent,
+        width: 2),
+    LineSeries<_ChartData, DateTime>(
+        name: 'Loss',
+        enableTooltip: false,
+        animationDuration: 0,
+        dashArray: [3, 3, 3, 3],
+        dataSource: chartDataLine,
+        xValueMapper: (_ChartData sales, _) => sales.x,
+        yValueMapper: (_ChartData sales, _) => lost,
+        color: Colors.lightGreen,
+        width: 2),
+    LineSeries<_ChartData, DateTime>(
+        name: 'Orders',
         enableTooltip: true,
-        animationDuration: 2500,
+        animationDuration: 500,
         dataSource: chartData,
         xValueMapper: (_ChartData sales, _) => sales.x,
         yValueMapper: (_ChartData sales, _) => sales.y,
         pointColorMapper: (_ChartData sales, _) =>
-            sales.order.isLong ? t_red : t_green,
+          sales.order.isLong ? t_red : t_green,
         markerSettings: MarkerSettings(isVisible: true),
-        width: 0)
+        width: 1)
   ];
 }
 
